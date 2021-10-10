@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
-from django.views.generic.base import TemplateView
 from dashboard.views import DashboardView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 

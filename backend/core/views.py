@@ -1,6 +1,5 @@
-from django.db.models.query_utils import PathInfo
 from drf_spectacular.types import OpenApiTypes
-from rest_framework import viewsets
+from rest_framework import viewsets, views
 from rest_framework.exceptions import AuthenticationFailed, ParseError
 from rest_framework.response import Response
 from .serializers import (
@@ -82,9 +81,6 @@ class QuestViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
             return AllQuestsSerializer
         return QuestSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
     @extend_schema(request=CreateRequestBodyQuestSerializer)
     def create(self, request, *args, **kwargs):
 
@@ -117,3 +113,14 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
     def create(self, request, *args, **kwargs):
         request.data["user"] = request.user.id
         return super().create(request, *args, **kwargs)
+
+
+@f_permission_classes([IsAuthenticated])
+class QuestsByTypeView(views.APIView):
+    def get(self, request, quest_type_id):
+        print(request.user.id)
+        query_set = Quest.objects.filter(
+            user=request.user.id, parent=int(quest_type_id)
+        )
+        serializer = QuestSerializer(query_set, many=True)
+        return Response(serializer.data)
