@@ -1,51 +1,66 @@
+from django.db.models.query import QuerySet
 from drf_spectacular.types import OpenApiTypes
-from rest_framework import viewsets, views
+from rest_framework import viewsets
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from .serializers import (
+    CitiesPaginationSerializer,
     CitySerializer,
     EventSerializer,
+    EventsPaginationSerializer,
     QuestSerializer,
     QuestTypeSerializer,
-    CreateRequestBodyQuestSerializer,
+    CreateQuestRequestBodySerializer,
 )
 from .models import City, Event, Quest, QuestType
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.gis.geos import Point
+from rest_framework.pagination import LimitOffsetPagination
 
 
 class CityViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = CitySerializer
+    pagination_class = LimitOffsetPagination
     queryset = City.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return CitiesPaginationSerializer
+        return CitySerializer
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = EventSerializer
-    queryset = Event.objects.all()
+    pagination_class = LimitOffsetPagination
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return EventsPaginationSerializer
+        return EventSerializer
+
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        if city := self.request.query_params.get("city") and self.action == "list":
+            return queryset.objects.filter(city=city)
+        return queryset
 
     @extend_schema(
         parameters=[OpenApiParameter("city", OpenApiTypes.INT, OpenApiParameter.QUERY)]
     )
     def list(self, request, *args, **kwargs):
-        if city := request.query_params.get("city"):
-            queryset = Event.objects.filter(city=city)
-            serializer = self.serializer_class(queryset, many=True)
-            return Response(serializer.data)
         return super().list(self, request, *args, **kwargs)
 
 
 class QuestViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
+    pagination_class = LimitOffsetPagination
     serializer_class = QuestSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = Quest.objects.filter(user=user)
-        if type_ := self.request.query_params.get("type"):
+        queryset = Quest.objects.filter(user=self.request.user)
+        if type_ := self.request.query_params.get("type") and self.action == "list":
             parent = QuestType.objects.filter(id=type_).first()
-            queryset = queryset.filter(parent=parent)
+            return queryset.filter(parent=parent)
         return queryset
 
     @extend_schema(
@@ -54,7 +69,7 @@ class QuestViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @extend_schema(request=CreateRequestBodyQuestSerializer)
+    @extend_schema(request=CreateQuestRequestBodySerializer)
     def create(self, request, *args, **kwargs):
         parent = request.data.get("parent")
         geom = Point(*request.data.get("point"))
@@ -73,15 +88,17 @@ class QuestViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
 
 
 class QuestTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    pagination_class = LimitOffsetPagination
     serializer_class = QuestTypeSerializer
-    queryset = QuestType.objects.all()
+
+    def get_queryset(self):
+        queryset = QuestType.objects.all()
+        if event := self.request.query_params.get("event") and self.action == "list":
+            return queryset.objects.filter(event=event)
+        return queryset
 
     @extend_schema(
         parameters=[OpenApiParameter("event", OpenApiTypes.INT, OpenApiParameter.QUERY)]
     )
     def list(self, request):
-        if event := request.query_params.get("event"):
-            queryset = QuestType.objects.filter(event=event)
-            serializer = self.serializer_class(queryset, many=True)
-            return Response(serializer.data)
         return super().list(self, request)
