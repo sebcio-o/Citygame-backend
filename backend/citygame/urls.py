@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
-from dashboard.views import DashboardView
+
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from django.conf import settings
@@ -12,12 +12,11 @@ admin.site.index_title = "CityGame - Mission Control"
 admin.site.site_title = "CityGame - Mission Control"
 
 urlpatterns = [
-    path("api/users/", include("users.urls")),
-    path("api/", include("core.urls")),
-    path("dashboard/", DashboardView.as_view()),
     path("admin/", admin.site.urls),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"
     ),
+    path("users/", include("users.urls")),
+    path("", include("core.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

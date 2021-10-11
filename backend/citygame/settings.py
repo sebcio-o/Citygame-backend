@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "users",
     "core",
-    "dashboard",
     "rest_framework",
     "rest_framework.authtoken",
     "drf_spectacular",
@@ -111,5 +110,4 @@ SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_DIST": "SIDECAR",
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "REDOC_DIST": "SIDECAR",
-    "SCHEMA_PATH_PREFIX": r"/api/",
 }
