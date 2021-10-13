@@ -1,9 +1,11 @@
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import serializers
-from .models import User
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from django.utils.translation import gettext_lazy as _
 from users.backends import backend
+
+from .models import User
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):

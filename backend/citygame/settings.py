@@ -1,9 +1,12 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = "django-insecure-^)d=b)#x_#$4zf7hxk!%&y^d1)&k32(h64(-1e4a%z*1mxsw15"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = os.environ["DJANGO_SECRET"]
+DEBUG = bool(int(os.environ["DEBUG"]))
+ALLOWED_HOSTS = [
+    host.strip() for host in os.environ.get("ALLOWED_HOSTS", "").split(",") if host
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -53,12 +56,14 @@ WSGI_APPLICATION = "citygame.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "db",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "db",
-        "PORT": "5432",
+        "ENGINE": os.environ.get(
+            "POSTGRES_ENGINE", "django.contrib.gis.db.backends.postgis"
+        ),
+        "NAME": os.environ.get("POSTGRES_DB"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
 

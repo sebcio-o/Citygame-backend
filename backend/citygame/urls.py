@@ -1,11 +1,10 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-
-from django.conf import settings
-from django.conf.urls.static import static
 
 admin.site.site_header = "CityGame - Mission Control"
 admin.site.index_title = "CityGame - Mission Control"

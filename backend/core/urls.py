@@ -1,13 +1,11 @@
 from rest_framework.routers import SimpleRouter
-from .views import (
-    CityViewSet,
-    EventViewSet,
-    QuestTypeViewSet,
-    QuestViewSet,
-)
+
+from .views import (CityViewSet, EventViewSet, QuestTypeViewSet, QuestViewSet,
+                    RewardViewSet)
 
 router = SimpleRouter()
 router.register(r"cities", CityViewSet, basename="city")
+router.register(r"events/rewards", RewardViewSet, basename="rewards")
 router.register(r"events", EventViewSet, basename="event")
 router.register(r"quests/types", QuestTypeViewSet, basename="quest-type")
 router.register(r"quests", QuestViewSet, basename="quest")

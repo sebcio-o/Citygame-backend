@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import City, Event, Quest, QuestType
+
+from .models import City, Event, Quest, QuestType, Reward
 
 
 class CitiesPaginationSerializer(serializers.ModelSerializer):
@@ -23,6 +24,12 @@ class EventsPaginationSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
+        fields = "__all__"
+
+
+class RewardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reward
         fields = "__all__"
 
 

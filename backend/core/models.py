@@ -1,5 +1,6 @@
 from django.contrib.gis.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+
 from users.models import User
 
 
@@ -22,6 +23,15 @@ class Event(models.Model):
         return self.name
 
 
+class Reward(models.Model):
+    name = models.CharField(max_length=100)
+    url = models.URLField()
+    event = models.ForeignKey(Event, models.CASCADE)
+
+    def __str__(self) -> str:
+        return super().__str__()
+
+
 class QuestType(models.Model):
     name = models.CharField(max_length=32)
     description = models.TextField()
@@ -38,5 +48,5 @@ class QuestType(models.Model):
 
 class Quest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    parent = models.ForeignKey(QuestType, on_delete=models.CASCADE)
+    quest_type = models.ForeignKey(QuestType, on_delete=models.CASCADE)
     finish_date = models.DateTimeField(null=True)
